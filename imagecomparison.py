@@ -26,17 +26,17 @@ if img1 and img2:
     image2_gray = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
 
     # Initialize SURF
-    surf = cv2.xfeatures2d.SURF_create(400)
+    akaze = cv2.AKAZE_create()
 
     # Detect keypoints and descriptors
-    kp1, des1 = surf.detectAndCompute(image1_gray, None)
-    kp2, des2 = surf.detectAndCompute(image2_gray, None)
+    kp1, des1 = akaze.detectAndCompute(image1_gray, None)
+    kp2, des2 = akaze.detectAndCompute(image2_gray, None)
 
     # Match using FLANN matcher
-    index_params = dict(algorithm=0, trees=5)
-    search_params = dict()
-    flann = cv2.FlannBasedMatcher(index_params, search_params)
-    matches = flann.knnMatch(des1, des2, k=2)
+    #index_params = dict(algorithm=0, trees=5)
+    #search_params = dict()
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING)
+    matches = bf.knnMatch(des1, des2, k=2)
 
     # Store all good matches as per Lowe's ratio test
     good_matches = []
