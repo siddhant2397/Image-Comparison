@@ -48,8 +48,9 @@ if img1 and img2:
             #match_img = cv2.drawMatches(image1, kp1, image2, kp2, good_matches, None, flags=2)
             #match_img_rgb = cv2.cvtColor(match_img, cv2.COLOR_BGR2RGB)
             #st.image(match_img_rgb, caption="AKAZE Feature Matches")
-            unmatched_kp1 = [kp for i, kp in enumerate(kp1) if i not in good_matches_idx1]
-            unmatched_kp2 = [kp for i, kp in enumerate(kp2) if i not in good_matches_idx2]
+            min_size_threshold = 5
+            unmatched_kp1 = [kp for i, kp in enumerate(kp1) if i not in good_matches_idx1 and kp.size >= min_size_threshold]
+            unmatched_kp2 = [kp for i, kp in enumerate(kp2) if i not in good_matches_idx2 and kp.size >= min_size_threshold]
             # Draw only unmatched keypoints (differences)
             diff_img1 = draw_keypoints(image1, unmatched_kp1)
             diff_img2 = draw_keypoints(image2, unmatched_kp2)
