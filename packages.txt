@@ -1,8 +1,5 @@
-﻿streamlit
-langchain
-faiss-cpu
-PyMuPDF
-pandas
-unstructured
-sentence-transformers
-huggingface-hub
+libgl1
+libglib2.0-0
+libsm6
+libxrender1
+libxext6
