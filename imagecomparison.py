@@ -10,12 +10,23 @@ img2 = st.file_uploader("Upload Second Image", type=['jpg', 'png', 'jpeg'])
 def draw_keypoints(image, kp, color=(0, 0, 255)):
     # Draw circles for keypoints (change)
     return cv2.drawKeypoints(image, kp, None, color, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+max_dimension = 1500  # Adjust this to control approximate image size (~600KB target)
+
+def resize_image(image):
+    h, w = image.shape[:2]
+    scale = max_dimension / max(h, w)
+    if scale < 1:
+        return cv2.resize(image, (int(w*scale), int(h*scale)), interpolation=cv2.INTER_AREA)
+    return image
+
 
 
 if img1 and img2:
     try:
         image1 = np.array(Image.open(img1).convert('RGB'))
         image2 = np.array(Image.open(img2).convert('RGB'))
+        image1 = resize_image(image1)
+        image2 = resize_image(image2)
         image1_gray = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
         image2_gray = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
         akaze = cv2.AKAZE_create()
