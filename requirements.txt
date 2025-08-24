@@ -1,4 +1,5 @@
 streamlit
 azure-cognitiveservices-vision-computervision
 msrest
-
+opencv-python
+Pillow
