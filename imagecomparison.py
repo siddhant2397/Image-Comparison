@@ -1,61 +1,53 @@
 import streamlit as st
-import cv2
-import numpy as np
-from PIL import Image
+from azure.cognitiveservices.vision.computervision import ComputerVisionClient
+from msrest.authentication import CognitiveServicesCredentials
+from azure.cognitiveservices.vision.computervision.models import VisualFeatureTypes
+import io
 
-st.title("AKAZE Image Feature Comparison")
+# Azure Computer Vision credentials
+endpoint = st.secrets["azure_endpoint"]
+key = st.secrets["azure_key"]
 
-img1 = st.file_uploader("Upload First Image", type=['jpg', 'png', 'jpeg'])
-img2 = st.file_uploader("Upload Second Image", type=['jpg', 'png', 'jpeg'])
-def draw_keypoints(image, kp, color=(0, 0, 255)):
-    # Draw circles for keypoints (change)
-    return cv2.drawKeypoints(image, kp, None, color, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-max_dimension = 1500  # Adjust this to control approximate image size (~600KB target)
+# Initialize client
+client = ComputerVisionClient(endpoint, CognitiveServicesCredentials(key))
 
-def resize_image(image):
-    h, w = image.shape[:2]
-    scale = max_dimension / max(h, w)
-    if scale < 1:
-        return cv2.resize(image, (int(w*scale), int(h*scale)), interpolation=cv2.INTER_AREA)
-    return image
+st.title("Image Difference Detection using Azure Computer Vision")
 
+uploaded_file1 = st.file_uploader("Upload first image", type=["jpg", "jpeg", "png"])
+uploaded_file2 = st.file_uploader("Upload second image", type=["jpg", "jpeg", "png"])
 
+def analyze_image(image_stream):
+    return client.analyze_image_in_stream(
+        image_stream,
+        visual_features=[VisualFeatureTypes.tags, VisualFeatureTypes.objects]
+    )
 
-if img1 and img2:
-    try:
-        image1 = np.array(Image.open(img1).convert('RGB'))
-        image2 = np.array(Image.open(img2).convert('RGB'))
-        image1 = resize_image(image1)
-        image2 = resize_image(image2)
-        image1_gray = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
-        image2_gray = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
-        akaze = cv2.AKAZE_create()
-        kp1, des1 = akaze.detectAndCompute(image1_gray, None)
-        kp2, des2 = akaze.detectAndCompute(image2_gray, None)
-        if des1 is None or des2 is None:
-            st.warning("No features found in one or both images. Please use clearer images.")
-        else:
-            bf = cv2.BFMatcher(cv2.NORM_HAMMING)
-            matches = bf.knnMatch(des1, des2, k=2)
-            #good_matches = []
-            good_matches_idx1 = set()
-            good_matches_idx2 = set()
-            for i, (m, n) in enumerate(matches):
-                if m.distance < 0.7 * n.distance:
-                    #good_matches.append(m)
-                    good_matches_idx1.add(m.queryIdx)
-                    good_matches_idx2.add(m.trainIdx)
-            #match_img = cv2.drawMatches(image1, kp1, image2, kp2, good_matches, None, flags=2)
-            #match_img_rgb = cv2.cvtColor(match_img, cv2.COLOR_BGR2RGB)
-            #st.image(match_img_rgb, caption="AKAZE Feature Matches")
-            min_size_threshold = 30
-            unmatched_kp1 = [kp for i, kp in enumerate(kp1) if i not in good_matches_idx1 and kp.size >= min_size_threshold]
-            unmatched_kp2 = [kp for i, kp in enumerate(kp2) if i not in good_matches_idx2 and kp.size >= min_size_threshold]
-            # Draw only unmatched keypoints (differences)
-            diff_img1 = draw_keypoints(image1, unmatched_kp1)
-            diff_img2 = draw_keypoints(image2, unmatched_kp2)
-            st.write("Unmatched keypoints (differences) are highlighted in each image below:")
-            st.image(cv2.cvtColor(diff_img1, cv2.COLOR_BGR2RGB), caption="Differences in First Image")
-            st.image(cv2.cvtColor(diff_img2, cv2.COLOR_BGR2RGB), caption="Differences in Second Image")
-    except Exception as e:
-        st.error(f"Error processing images: {e}")
+def get_tags_and_objects(analysis):
+    tags = set([tag.name for tag in analysis.tags])
+    objects = set([obj.object_property for obj in analysis.objects])
+    return tags, objects
+
+if uploaded_file1 and uploaded_file2:
+    image1 = io.BytesIO(uploaded_file1.read())
+    image2 = io.BytesIO(uploaded_file2.read())
+
+    analysis1 = analyze_image(image1)
+    analysis2 = analyze_image(image2)
+
+    tags1, objects1 = get_tags_and_objects(analysis1)
+    tags2, objects2 = get_tags_and_objects(analysis2)
+
+    st.write("Tags in image 1:", tags1)
+    st.write("Tags in image 2:", tags2)
+
+    st.write("Objects in image 1:", objects1)
+    st.write("Objects in image 2:", objects2)
+
+    diff_tags = tags1.symmetric_difference(tags2)
+    diff_objects = objects1.symmetric_difference(objects2)
+
+    st.write("Different tags between images:", diff_tags)
+    st.write("Different objects between images:", diff_objects)
+
+else:
+    st.write("Please upload two images to compare.")
