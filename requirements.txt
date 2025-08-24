@@ -1,6 +1,4 @@
 streamlit
-opencv-contrib-python
-numpy
-Pillow
-
+azure-cognitiveservices-vision-computervision
+msrest
 
