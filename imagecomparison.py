@@ -63,6 +63,13 @@ def compute_image_diff(img1_bgr, img2_bgr):
 
     return highlighted, dilated
 
+def draw_diff_contours(original_img, diff_mask):
+    contours, _ = cv2.findContours(diff_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contour_img = original_img.copy()
+    cv2.drawContours(contour_img, contours, -1, (0, 255, 0), 3)  # Green contours
+    return contour_img
+
+
 if uploaded_file1 and uploaded_file2:
     # Read raw bytes for OpenCV
     img_bytes1 = uploaded_file1.read()
@@ -88,11 +95,10 @@ if uploaded_file1 and uploaded_file2:
 
     # Compute visual difference with highlighting
     highlighted_diff, diff_mask = compute_image_diff(cv_img1, cv_img2)
+    contour_highlighted = draw_diff_contours(cv_img1, diff_mask)
 
-    st.subheader("Visual Difference Highlight")
+    st.subheader("Visual Difference Highlight with Contours")
+    st.image(cv2.cvtColor(contour_highlighted, cv2.COLOR_BGR2RGB), use_column_width=True)
     
-    st.subheader("Highlighted Differences (in red overlay on Image 1)")
-    st.image(cv2.cvtColor(highlighted_diff, cv2.COLOR_BGR2RGB), use_column_width=True)
-
 else:
     st.write("Please upload two images to compare.")
