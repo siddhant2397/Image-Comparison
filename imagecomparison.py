@@ -76,11 +76,6 @@ if uploaded_file1 and uploaded_file2:
     tags2, objects2 = get_tags_and_objects(analysis2)
 
     st.subheader("Azure Computer Vision Analysis")
-    st.write("Tags in image 1:", tags1)
-    st.write("Tags in image 2:", tags2)
-    st.write("Objects in image 1:", objects1)
-    st.write("Objects in image 2:", objects2)
-
     diff_tags = tags1.symmetric_difference(tags2)
     diff_objects = objects1.symmetric_difference(objects2)
 
@@ -95,14 +90,7 @@ if uploaded_file1 and uploaded_file2:
     highlighted_diff, diff_mask = compute_image_diff(cv_img1, cv_img2)
 
     st.subheader("Visual Difference Highlight")
-
-    # Show original images side by side
-    col1, col2 = st.columns(2)
-    with col1:
-        st.image(cv2.cvtColor(cv_img1, cv2.COLOR_BGR2RGB), caption="Image 1", use_column_width=True)
-    with col2:
-        st.image(cv2.cvtColor(cv_img2, cv2.COLOR_BGR2RGB), caption="Image 2", use_column_width=True)
-
+    
     st.subheader("Highlighted Differences (in red overlay on Image 1)")
     st.image(cv2.cvtColor(highlighted_diff, cv2.COLOR_BGR2RGB), use_column_width=True)
 
