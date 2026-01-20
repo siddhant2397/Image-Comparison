@@ -1,104 +1,83 @@
 import streamlit as st
-from azure.cognitiveservices.vision.computervision import ComputerVisionClient
-from msrest.authentication import CognitiveServicesCredentials
-from azure.cognitiveservices.vision.computervision.models import VisualFeatureTypes
-import cv2
-import numpy as np
-from PIL import Image
-import io
+import pandas as pd
+import pymongo
+from datetime import datetime, date
+import plotly.express as px
 
-# Retrieve Azure credentials from Streamlit secrets
-endpoint = st.secrets["azure_endpoint"]
-key = st.secrets["azure_key"]
+# MongoDB connection
+@st.cache_resource
+def get_db():
+    client = pymongo.MongoClient(st.secrets["MONGO_URI"])
+    return client["cyclothon"]["daily_logs"]
 
-# Initialize Azure Computer Vision client
-client = ComputerVisionClient(endpoint, CognitiveServicesCredentials(key))
+st.set_page_config(page_title="Cyclothon Dashboard", layout="wide")
+st.title("🏔️ Coastal Cyclothon - Cumulative Progress")
 
-st.title("Image Difference Detection with Azure Vision & Visual Diff")
-
-uploaded_file1 = st.file_uploader("Upload first image", type=["jpg", "jpeg", "png"])
-uploaded_file2 = st.file_uploader("Upload second image", type=["jpg", "jpeg", "png"])
-
-def analyze_image(image_stream):
-    return client.analyze_image_in_stream(
-        image_stream,
-        visual_features=[VisualFeatureTypes.tags, VisualFeatureTypes.objects]
-    )
-
-def get_tags_and_objects(analysis):
-    tags = set([tag.name for tag in analysis.tags])
-    objects = set([obj.object_property for obj in analysis.objects])
-    return tags, objects
-
-def convert_to_cv2(image_bytes):
-    # Convert bytes to OpenCV image (numpy array, BGR format)
-    pil_image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
-    cv_image = np.array(pil_image)
-    return cv2.cvtColor(cv_image, cv2.COLOR_RGB2BGR)
-
-def compute_image_diff(img1_bgr, img2_bgr):
-    # Resize images if necessary for size equality
-    if img1_bgr.shape != img2_bgr.shape:
-        img2_bgr = cv2.resize(img2_bgr, (img1_bgr.shape[1], img1_bgr.shape[0]))
-
-    # Compute absolute difference between images
-    diff = cv2.absdiff(img1_bgr, img2_bgr)
-
-    # Convert to grayscale
-    gray_diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-
-    # Threshold the difference image to get areas of significant change
-    _, thresh = cv2.threshold(gray_diff, 30, 255, cv2.THRESH_BINARY)
-
-    # Dilate the thresholded image to enlarge differences
-    kernel = np.ones((5,5), np.uint8)
-    dilated = cv2.dilate(thresh, kernel, iterations=2)
-
-    # Create a red mask for difference areas
-    mask = np.zeros_like(img1_bgr)
-    mask[:, :, 2] = dilated  # Red channel
-
-    # Overlay red mask on original image to highlight differences
-    highlighted = cv2.addWeighted(img1_bgr, 1, mask, 0.5, 0)
-
-    return highlighted, dilated
-
-def draw_diff_contours(original_img, diff_mask):
-    contours, _ = cv2.findContours(diff_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    contour_img = original_img.copy()
-    cv2.drawContours(contour_img, contours, -1, (0, 255, 0), 3)  # Green contours
-    return contour_img
-
-
-if uploaded_file1 and uploaded_file2:
-    # Read raw bytes for OpenCV
-    img_bytes1 = uploaded_file1.read()
-    img_bytes2 = uploaded_file2.read()
-
-    # Analyze images with Azure Computer Vision
-    analysis1 = analyze_image(io.BytesIO(img_bytes1))
-    analysis2 = analyze_image(io.BytesIO(img_bytes2))
-
-    tags1, objects1 = get_tags_and_objects(analysis1)
-    tags2, objects2 = get_tags_and_objects(analysis2)
-
-    st.subheader("Azure Computer Vision Analysis")
-    diff_tags = tags1.symmetric_difference(tags2)
-    diff_objects = objects1.symmetric_difference(objects2)
-
-    st.write("Different tags between images:", diff_tags)
-    st.write("Different objects between images:", diff_objects)
-
-    # Convert to OpenCV format
-    cv_img1 = convert_to_cv2(img_bytes1)
-    cv_img2 = convert_to_cv2(img_bytes2)
-
-    # Compute visual difference with highlighting
-    highlighted_diff, diff_mask = compute_image_diff(cv_img1, cv_img2)
-    contour_highlighted = draw_diff_contours(cv_img1, diff_mask)
-
-    st.subheader("Visual Difference Highlight with Contours")
-    st.image(cv2.cvtColor(contour_highlighted, cv2.COLOR_BGR2RGB), use_column_width=True)
+# Sidebar Admin
+with st.sidebar:
+    st.header("👨‍💼 Admin Panel")
+    admin_pass = st.text_input("Password", type="password")
     
-else:
-    st.write("Please upload two images to compare.")
+    if st.button("Login") and admin_pass == "cyclothon2026":
+        st.session_state.admin = True
+        st.rerun()
+    
+    if st.session_state.get("admin", False):
+        st.success("✅ Admin Logged In")
+        
+        # Daily Entry Form
+        with st.form("daily_entry"):
+            st.subheader("Daily Distance Entry")
+            cyclist_name = st.selectbox("Select Cyclist", 
+                options=["Ravi", "Priya", "Amit", "Neha", "Vikram", "Sonia"])  # Add your team names
+            daily_distance = st.number_input("Today's Distance (km)", min_value=0.0, step=0.1)
+            submitted = st.form_submit_button("Log Daily Distance")
+            
+            if submitted:
+                # Save daily log
+                get_db().insert_one({
+                    "cyclist": cyclist_name,
+                    "date": date.today().isoformat(),
+                    "daily_distance": daily_distance
+                })
+                st.success(f"✅ {daily_distance}km logged for {cyclist_name}!")
+                st.rerun()
+
+# Main Dashboard (visible to all)
+col1, col2, col3 = st.columns(3)
+try:
+    # Fetch ALL daily logs
+    logs = list(get_db().find().sort("date", -1))
+    df = pd.DataFrame(logs)
+    df['date'] = pd.to_datetime(df['date'])
+    
+    # Calculate cumulative totals per cyclist
+    summary = df.groupby('cyclist')['daily_distance'].sum().round(1)
+    summary = summary.sort_values(ascending=False)
+    
+    # KPIs
+    with col1: st.metric("Total Team Distance", f"{summary.sum():.1f} km")
+    with col2: st.metric("Cyclists", len(summary))
+    with col3: st.metric("Avg per Cyclist", f"{summary.mean():.1f} km")
+    
+    # Main table - CUMULATIVE totals
+    st.subheader("👥 Cumulative Leaderboard")
+    leaderboard_df = pd.DataFrame({
+        'Cyclist': summary.index,
+        'Total Distance (km)': summary.values
+    })
+    st.dataframe(leaderboard_df, use_container_width=True, height=400)
+    
+    # Chart
+    fig = px.bar(leaderboard_df, x='Cyclist', y='Total Distance (km)', 
+                title="Cumulative Distance by Cyclist", color='Total Distance (km)')
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Recent daily entries
+    st.subheader("📅 Today's Latest Entries")
+    recent = df.tail(10)[['cyclist', 'daily_distance', 'date']]
+    recent['date'] = recent['date'].dt.strftime('%Y-%m-%d')
+    st.dataframe(recent, use_container_width=True)
+    
+except:
+    st.info("👆 Admin: Log first entry using sidebar")
