@@ -8,7 +8,7 @@ import plotly.express as px
 @st.cache_resource
 def get_db():
     client = pymongo.MongoClient(st.secrets["MONGO_URI"])
-    return client["cyclothon"]["daily_logs"]
+    return client["Cyclothon"]["daily_logs"]
 
 st.set_page_config(page_title="Cyclothon Dashboard", layout="wide")
 st.title("🏔️ Coastal Cyclothon - Cumulative Progress")
