@@ -1,5 +1,6 @@
 streamlit
-azure-cognitiveservices-vision-computervision
-msrest
-opencv-python
-Pillow
+pymongo
+pandas
+plotly
+streamlit-folium
+folium
