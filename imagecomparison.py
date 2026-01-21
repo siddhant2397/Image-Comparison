@@ -122,7 +122,7 @@ try:
         from streamlit_folium import st_folium
         
         # Center map on India
-        m = folium.Map(location=[20.5937, 70.9629], zoom_start=5)
+        m = folium.Map(location=[20.5937, 80.5], zoom_start=5)
         
         # Add markers
         for loc in locations:
