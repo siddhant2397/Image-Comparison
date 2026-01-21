@@ -9,9 +9,13 @@ import plotly.express as px
 def get_db():
     client = pymongo.MongoClient(st.secrets["MONGO_URI"])
     return client["Cyclothon"]["daily_logs"]
+@st.cache_resource
+def get_team_db():
+    client = pymongo.MongoClient(st.secrets["MONGO_URI"])
+    return client["Cyclothon"]["team"]
 
 st.set_page_config(page_title="Cyclothon Dashboard", layout="wide")
-st.title("🏔️ Coastal Cyclotho")
+st.title("🏔️ Coastal Cyclothon")
 
 # Sidebar Admin
 with st.sidebar:
@@ -42,23 +46,48 @@ with st.sidebar:
                 })
                 st.success(f"✅ {daily_distance}km logged for {cyclist_name}!")
                 st.rerun()
+        with st.form("daily_team_entry"):
+            st.subheader("Daily Team Entry")
+            team_total_distance = st.number_input("Team Total Distance Today (km)", min_value=0.0, step=1.0)
+            team_avg_speed = st.number_input("Team Avg Speed Today (km/h)", min_value=0.0, step=0.1)
+            submitted = st.form_submit_button("Log Team Data")
+            
+            if submitted:
+                get_team_db().insert_one({
+                    "date": date.today().isoformat(),
+                    "team_total_distance": team_total_distance,
+                    "team_avg_speed": team_avg_speed
+                })
+                st.success(f"✅ Team: {team_total_distance}km at {team_avg_speed}km/h!")
+                st.rerun()
+
+
 
 # Main Dashboard (visible to all)
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 try:
     # Fetch ALL daily logs
-    logs = list(get_db().find().sort("date", -1))
+    logs = list(get_team_db().find().sort("date", -1))
     df = pd.DataFrame(logs)
     df['date'] = pd.to_datetime(df['date'])
+    log = list(get_db().find().sort("date", -1))
+    df1 = pd.DataFrame(log)
+    df1['date'] = pd.to_datetime(df1['date'])
+    
     
     # Calculate cumulative totals per cyclist
-    summary = df.groupby('cyclist')['daily_distance'].sum().round(1)
+    summary = df1.groupby('cyclist')['daily_distance'].sum().round(1)
     summary = summary.sort_values(ascending=False)
+    total_distance = df['team_total_distance'].sum()
+    avg_speed_all = df['team_avg_speed'].mean().round(1)
+    days_active = len(df['date'].unique())
+    
     
     # KPIs
-    with col1: st.metric("Total Team Distance", f"{summary.sum():.1f} km")
-    with col2: st.metric("Cyclists", len(summary))
-    with col3: st.metric("Avg per Cyclist", f"{summary.mean():.1f} km")
+    with col1: st.metric("Cumulative Team Distance", f"{total_distance:.1f} km")
+    with col2: st.metric("Avg Speed (All Time)", f"{avg_speed_all} km/h")
+    with col3: st.metric("Days Active", days_active)
+    with col4: st.metric("Active Cyclists", len(summary))
     
     # Main table - CUMULATIVE totals
     st.subheader("👥 Cumulative Leaderboard")
@@ -69,9 +98,12 @@ try:
     st.dataframe(leaderboard_df, use_container_width=True, height=400)
     
     # Chart
-    fig = px.bar(leaderboard_df, x='Cyclist', y='Total Distance (km)', 
-                title="Cumulative Distance by Cyclist", color='Total Distance (km)')
-    st.plotly_chart(fig, use_container_width=True)
+    df_cumulative = df.sort_values('date').copy()
+    df_cumulative['cumulative_distance'] = df_cumulative['team_total_distance'].cumsum()
+    fig_cum = px.line(df_cumulative, x='date', y='cumulative_distance',
+                     title="Cumulative Team Distance")
+    st.plotly_chart(fig_cum, use_container_width=True)
+
     
     
     
