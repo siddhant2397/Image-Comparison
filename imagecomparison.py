@@ -100,15 +100,18 @@ try:
     # Daily Team Distance (AGGREGATED by date)
     st.subheader("📈 Daily Team Distance")
     df_daily = df.groupby(df['date'].dt.date)['team_total_distance'].sum().reset_index()
-    df_daily['date'] = pd.to_datetime(df_daily['date'])
-
+    df_daily.columns = ['date', 'team_total_distance']  # Clean columns
+    df_daily['date_formatted'] = df_daily['date'].dt.strftime('%Y-%m-%d')  # Date strings
     fig_daily = px.bar(df_daily.sort_values('date', ascending=False).head(30),
-                       x='date', y='team_total_distance',
-                       title="Daily Distance (Combined)",
+                       x='date_formatted',  # ← Use formatted date strings
+                       y='team_total_distance',
+                       title="Daily Distance (Last 30 Days)",
                        color='team_total_distance',
                        color_continuous_scale='Viridis')
     fig_daily.update_traces(texttemplate='%{y:.0f}km', textposition='outside')
-    fig_daily.update_layout(xaxis_title="Date", yaxis_title="Daily Distance (km)")
+    fig_daily.update_layout(xaxis_title="Date", 
+                            yaxis_title="Daily Distance (km)",
+                            xaxis_tickangle=45 
     st.plotly_chart(fig_daily, use_container_width=True)
 
 
