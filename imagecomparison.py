@@ -94,7 +94,7 @@ try:
         'Cyclist': summary.index,
         'Total Distance (km)': summary.values
     })
-    st.dataframe(leaderboard_df, use_container_width=True, height=400)
+    st.dataframe(leaderboard_df, width='stretch', height=400)
     
     # Chart
     # Daily Team Distance (AGGREGATED by date)
