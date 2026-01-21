@@ -128,8 +128,9 @@ try:
         for loc in locations:
             folium.Marker(
                 [loc['lat'], loc['lng']],
-                popup=f"<b>{loc['name']}</b><br>Date: {loc.get('date', 'N/A')}",
-                tooltip=loc['name']
+                popup=f"<b style='color:red'>{loc['name']}</b><br>Date: {loc.get('date', 'N/A')}",
+                tooltip=loc['name'],
+                icon=folium.Icon(color='red', icon='info-sign')  # ✅ RED PIN
             ).add_to(m)
         
         # Display interactive map
