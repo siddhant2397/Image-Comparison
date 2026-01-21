@@ -88,7 +88,7 @@ try:
     with col2: st.metric("Avg Speed (All Time)", f"{avg_speed_all} km/h")
     with col3: st.metric("Days Active", days_active)
     with col4: st.metric("Active Cyclists", len(summary))
-    
+    https://cloud.mongodb.com/v2/6881051e4e790c520e195dc2#/clusters/starterTemplates?from=ctaClusterHeader
     # Main table - CUMULATIVE totals
     st.subheader("👥 Cumulative Leaderboard")
     leaderboard_df = pd.DataFrame({
@@ -98,11 +98,20 @@ try:
     st.dataframe(leaderboard_df, use_container_width=True, height=400)
     
     # Chart
-    df_cumulative = df.sort_values('date').copy()
-    df_cumulative['cumulative_distance'] = df_cumulative['team_total_distance'].cumsum()
-    fig_cum = px.line(df_cumulative, x='date', y='cumulative_distance',
-                     title="Cumulative Team Distance")
-    st.plotly_chart(fig_cum, use_container_width=True)
+    # Daily Team Distance (AGGREGATED by date)
+    st.subheader("📈 Daily Team Distance")
+    df_daily = df.groupby(df['date'].dt.date)['team_total_distance'].sum().reset_index()
+    df_daily['date'] = pd.to_datetime(df_daily['date'])
+
+    fig_daily = px.bar(df_daily.sort_values('date', ascending=False).head(30),
+                       x='date', y='team_total_distance',
+                       title="Daily Distance (Combined)",
+                       color='team_total_distance',
+                       color_continuous_scale='Viridis')
+    fig_daily.update_traces(texttemplate='%{y:.0f}km', textposition='outside')
+    fig_daily.update_layout(xaxis_title="Date", yaxis_title="Daily Distance (km)")
+    st.plotly_chart(fig_daily, use_container_width=True)
+
 
     
     
