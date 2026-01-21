@@ -61,6 +61,23 @@ with st.sidebar:
                 st.success(f"✅ Team: {team_total_distance}km at {team_avg_speed}km/h!")
                 st.rerun()
 
+        with st.form("location_entry"):
+            st.subheader("📍 Location Entry")
+            location_name = st.text_input("Location Name")
+            latitude = st.number_input("Latitude", min_value=-90.0, max_value=90.0, step=0.0001)
+            longitude = st.number_input("Longitude", min_value=-180.0, max_value=180.0, step=0.0001)
+            submitted_location = st.form_submit_button("Add Location")
+            
+        if submitted_location:
+            get_db().insert_one({"type": "location",
+                                 "name": location_name,
+                                 "lat": latitude,
+                                 "lng": longitude,
+                                 "date": date.today().isoformat()
+                                })
+            st.success(f"✅ {location_name} added at [{latitude}, {longitude}]!")
+            st.rerun()
+
 
 
 # Main Dashboard (visible to all)
@@ -95,6 +112,32 @@ try:
         'Total Distance (km)': summary.values
     })
     st.dataframe(leaderboard_df, width='stretch', height=400)
+    st.subheader("🗺️ Cyclothon Route Progress")
+    
+    # Fetch locations
+    locations = list(get_db().find({"type": "location"}).sort("date", -1))
+    
+    if locations:
+        import folium
+        from streamlit_folium import st_folium
+        
+        # Center map on India
+        m = folium.Map(location=[20.5937, 78.9629], zoom_start=5)
+        
+        # Add markers
+        for loc in locations:
+            folium.Marker(
+                [loc['lat'], loc['lng']],
+                popup=f"<b>{loc['name']}</b><br>Date: {loc.get('date', 'N/A')}",
+                tooltip=loc['name']
+            ).add_to(m)
+        
+        # Display interactive map
+        st_folium(m, width=1200, height=600)
+    else:
+        st.info("👆 Admin: Add locations using sidebar 'Location Entry' form!")
+
+
 
 
     
