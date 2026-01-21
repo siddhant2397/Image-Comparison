@@ -111,7 +111,7 @@ try:
     fig_daily.update_traces(texttemplate='%{y:.0f}km', textposition='outside')
     fig_daily.update_layout(xaxis_title="Date", 
                             yaxis_title="Daily Distance (km)",
-                            xaxis_tickangle=45 
+                            xaxis_tickangle=45)
     st.plotly_chart(fig_daily, use_container_width=True)
 
 
