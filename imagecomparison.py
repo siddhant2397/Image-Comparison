@@ -11,14 +11,14 @@ def get_db():
     return client["Cyclothon"]["daily_logs"]
 
 st.set_page_config(page_title="Cyclothon Dashboard", layout="wide")
-st.title("🏔️ Coastal Cyclothon - Cumulative Progress")
+st.title("🏔️ Coastal Cyclotho")
 
 # Sidebar Admin
 with st.sidebar:
     st.header("👨‍💼 Admin Panel")
     admin_pass = st.text_input("Password", type="password")
     
-    if st.button("Login") and admin_pass == "cyclothon2026":
+    if st.button("Login") and admin_pass == "230200957":
         st.session_state.admin = True
         st.rerun()
     
@@ -73,11 +73,7 @@ try:
                 title="Cumulative Distance by Cyclist", color='Total Distance (km)')
     st.plotly_chart(fig, use_container_width=True)
     
-    # Recent daily entries
-    st.subheader("📅 Today's Latest Entries")
-    recent = df.tail(10)[['cyclist', 'daily_distance', 'date']]
-    recent['date'] = recent['date'].dt.strftime('%Y-%m-%d')
-    st.dataframe(recent, use_container_width=True)
+    
     
 except:
     st.info("👆 Admin: Log first entry using sidebar")
