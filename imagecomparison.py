@@ -102,6 +102,9 @@ try:
     df_daily = df.groupby(df['date'].dt.date)['team_total_distance'].sum().reset_index()
     df_daily = df_daily.rename(columns={'team_total_distance': 'total_daily_distance'})
     df_daily['date_formatted'] = df_daily['date'].dt.strftime('%Y-%m-%d')  # Date strings
+    st.write(df_daily.head())
+    if df_daily.empty:
+        st.error("❌ No team data found!")
     fig_daily = px.bar(df_daily.sort_values('date', ascending=False).head(30),
                        x='date_formatted',  # ← Use formatted date strings
                        y='total_daily_distance',
