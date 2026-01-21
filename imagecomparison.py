@@ -88,7 +88,6 @@ try:
     with col2: st.metric("Avg Speed (All Time)", f"{avg_speed_all} km/h")
     with col3: st.metric("Days Active", days_active)
     with col4: st.metric("Active Cyclists", len(summary))
-    https://cloud.mongodb.com/v2/6881051e4e790c520e195dc2#/clusters/starterTemplates?from=ctaClusterHeader
     # Main table - CUMULATIVE totals
     st.subheader("👥 Cumulative Leaderboard")
     leaderboard_df = pd.DataFrame({
