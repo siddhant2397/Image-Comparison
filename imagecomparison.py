@@ -115,7 +115,7 @@ try:
     fig_daily.update_layout(xaxis_title="Date", 
                             yaxis_title="Daily Distance (km)",
                             xaxis_tickangle=45)
-    st.plotly_chart(fig_daily, use_container_width=True)
+    st.plotly_chart(fig_daily, width = 'stretch')
 
 
     
