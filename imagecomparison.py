@@ -106,7 +106,7 @@ with east_tab:
             # Location Entry
             with st.form("east_location"):
                 location_name = st.text_input("Location Name")
-                latitude = st.number_load("Latitude", value=20.0, min_value=-90.0, max_value=90.0, step=0.0001)
+                latitude = st.number_input("Latitude", value=20.0, min_value=-90.0, max_value=90.0, step=0.0001)
                 longitude = st.number_input("Longitude", value=80.0, min_value=-180.0, max_value=180.0, step=0.0001)
                 submitted = st.form_submit_button("📍 Add East Location")
                 if submitted:
