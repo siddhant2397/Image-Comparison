@@ -152,22 +152,8 @@ with east_tab:
                     'Cyclist': summary.index,
                     'Total (km)': summary.values
                 })
-                st.dataframe(leaderboard_df, use_container_width=True, height=300)
+                st.dataframe(leaderboard_df, width='stretch', height=300)
             
-            # Daily Distance Graph
-            st.subheader("📈 Daily Team Progress")
-            df_daily = df_team.groupby(df_team['date'].dt.date)['team_total_distance'].sum().reset_index()
-            df_daily.columns = ['date', 'total_distance']
-            df_daily['date_str'] = df_daily['date'].dt.strftime('%Y-%m-%d')
-            
-            fig_daily = px.bar(df_daily.sort_values('date', ascending=False).head(30),
-                             x='date_str', y='total_distance',
-                             title="East Coast Daily Distance",
-                             color='total_distance',
-                             color_continuous_scale='Reds')
-            fig_daily.update_traces(texttemplate='%{y:.0f}km', textposition='outside')
-            fig_daily.update_layout(xaxis_title="Date", yaxis_title="Distance (km)", xaxis_tickangle=45)
-            st.plotly_chart(fig_daily, use_container_width=True)
             
             # Route Map
             st.subheader("🗺️ East Coast Route")
@@ -276,22 +262,8 @@ with west_tab:
                     'Cyclist': summary.index,
                     'Total (km)': summary.values
                 })
-                st.dataframe(leaderboard_df, use_container_width=True, height=300)
+                st.dataframe(leaderboard_df, width='stretch', height=300)
             
-            # Daily Distance Graph
-            st.subheader("📈 Daily Team Progress")
-            df_daily = df_team.groupby(df_team['date'].dt.date)['team_total_distance'].sum().reset_index()
-            df_daily.columns = ['date', 'total_distance']
-            df_daily['date_str'] = df_daily['date'].dt.strftime('%Y-%m-%d')
-            
-            fig_daily = px.bar(df_daily.sort_values('date', ascending=False).head(30),
-                             x='date_str', y='total_distance',
-                             title="West Coast Daily Distance",
-                             color='total_distance',
-                             color_continuous_scale='Blues')
-            fig_daily.update_traces(texttemplate='%{y:.0f}km', textposition='outside')
-            fig_daily.update_layout(xaxis_title="Date", yaxis_title="Distance (km)", xaxis_tickangle=45)
-            st.plotly_chart(fig_daily, use_container_width=True)
             
             # Route Map
             st.subheader("🗺️ West Coast Route")
