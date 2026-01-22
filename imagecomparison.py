@@ -159,7 +159,8 @@ with east_tab:
             st.subheader("🗺️ East Coast Route")
             locs = list(dbs["locations"].find().sort("date", -1))
             if locs:
-                m = folium.Map(location=[15.0, 85.0], zoom_start=6)
+                m = folium.Map(location=[15.0, 85.0], zoom_start=6,tiles='https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}',
+        attr='Google')
                 for loc in locs:
                     folium.Marker(
                         [loc['lat'], loc['lng']],
@@ -167,6 +168,8 @@ with east_tab:
                         tooltip=loc['name'],
                         icon=folium.Icon(color='red', icon='info-sign')
                     ).add_to(m)
+
+                m.fit_bounds([[8.0, 76.0], [24.0, 89.0]])
                 st_folium(m, width=1200, height=500)
             else:
                 st.info("👆 East Admin: Add locations using sidebar form")
@@ -269,7 +272,8 @@ with west_tab:
             st.subheader("🗺️ West Coast Route")
             locs = list(dbs["locations"].find().sort("date", -1))
             if locs:
-                m = folium.Map(location=[20.0, 72.0], zoom_start=6)
+                m = folium.Map(location=[20.0, 72.0], zoom_start=6, tiles='https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}',
+        attr='Google')
                 for loc in locs:
                     folium.Marker(
                         [loc['lat'], loc['lng']],
@@ -277,6 +281,8 @@ with west_tab:
                         tooltip=loc['name'],
                         icon=folium.Icon(color='blue', icon='info-sign')
                     ).add_to(m)
+
+                m.fit_bounds([[8.0, 68.0], [24.0, 75.0]]) 
                 st_folium(m, width=1200, height=500)
             else:
                 st.info("👆 West Admin: Add locations using sidebar form")
