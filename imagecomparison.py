@@ -180,7 +180,7 @@ with east_tab:
                                       font-size: 12px; font-weight: bold;box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
                                       🚴
                                       </div>
-                                      """,icon_size=(30,30),
+                                      """,icon_size=(20,20),
                                       icon_anchor=(15,15))
                                  ).add_to(m)
 
