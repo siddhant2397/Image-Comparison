@@ -174,13 +174,8 @@ with east_tab:
                                   <small>Route checkpoint</small>""",
                                   tooltip=f"{stop['name']} ({stop['date']})",
                                   icon=folium.DivIcon(
-                                      html=f"""
-                                      <div style="
-                                      background-color: #4CAF50; color: white; padding: 4px 8px; border-radius: 50%; 
-                                      font-size: 12px; font-weight: bold;box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-                                      🚴
-                                      </div>
-                                      """,icon_size=(10,10),
+                                      html='🚴',
+                                      icon_size=(10,10),
                                       icon_anchor=(15,15))
                                  ).add_to(m)
 
