@@ -24,7 +24,7 @@ def get_east_db():
         "individuals": db["east_individuals"],
         "team": db["east_team"],
         "locations": db["east_locations"],
-        "route": db["east_route"]"
+        "route": db["east_route"],
     }
 
 @st.cache_resource
@@ -35,7 +35,7 @@ def get_west_db():
         "individuals": db["west_individuals"],
         "team": db["west_team"],
         "locations": db["west_locations"],
-        "route": db["west_route"]"
+        "route": db["west_route"],
     }
 
 # MAIN HEADING
