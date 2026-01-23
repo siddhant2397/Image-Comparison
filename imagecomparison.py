@@ -23,7 +23,8 @@ def get_east_db():
     return {
         "individuals": db["east_individuals"],
         "team": db["east_team"],
-        "locations": db["east_locations"]
+        "locations": db["east_locations"],
+        "route": db["east_route"]"
     }
 
 @st.cache_resource
@@ -33,7 +34,8 @@ def get_west_db():
     return {
         "individuals": db["west_individuals"],
         "team": db["west_team"],
-        "locations": db["west_locations"]
+        "locations": db["west_locations"],
+        "route": db["west_route"]"
     }
 
 # MAIN HEADING
@@ -157,20 +159,53 @@ with east_tab:
             
             # Route Map
             st.subheader("🗺️ East Coast Route")
-            locs = list(dbs["locations"].find().sort("date", -1))
-            if locs:
-                m = folium.Map(location=[15.0, 85.0], zoom_start=6,tiles='https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}',
-        attr='Google')
-                for loc in locs:
-                    folium.Marker(
-                        [loc['lat'], loc['lng']],
-                        popup=f"<b style='color:red'>{loc['name']}</b><br>{loc.get('date', 'N/A')}",
-                        tooltip=loc['name'],
-                        icon=folium.Icon(color='red', icon='info-sign')
-                    ).add_to(m)
+            route_data = list(dbs["route"].find())
+            admin_locations = list(dbs["locations"].find())  # Admin current location
+            latest_admin_loc = admin_locations[0] if admin_locations else None 
+            if route_data or admin_locations:
+                m = folium.Map(location=[15.0, 85.0], zoom_start=6,
+                               tiles='https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}',
+                               attr='Google')
+                for stop in route_data:
+                    folium.Marker([stop['lat'], stop['lng']],
+                                  popup=f"""
+                                  <b>📍 {stop['name']}</b><br>
+                                  <i>Expected: {stop['expected_date']}</i><br>
+                                  <small>Route checkpoint</small>""",
+                                  tooltip=f"{stop['name']} ({stop['expected_date']})",
+                                  icon=folium.DivIcon(
+                                      html=f"""
+                                      <div style="
+                                      background-color: #4CAF50; color: white; padding: 4px 8px; border-radius: 50%; 
+                                      font-size: 12px; font-weight: bold;box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                                      🚴
+                                      </div>
+                                      """,icon_size=(30,30),
+                                      icon_anchor=(15,15))
+                                 ).add_to(m)
 
+                if latest_admin_loc:
+                    folium.Marker([latest_admin_loc['lat'], latest_admin_loc['lng']],
+                                  popup=f"""
+                                  <b style='color:red'>🎯 CURRENT LOCATION</b><br>
+                                  {latest_admin_loc['name']}<br>
+                                  <small>Reported: {latest_admin_loc.get('date', 'Today')}</small""",
+                                  tooltip="CURRENT POSITION",
+                                  icon=folium.Icon(color='red', icon='info-sign', icon_color='white')
+                                 ).add_to(m)
+
+                if len(route_data) > 1:
+                    folium.PolyLine(locations=[[stop['lat'], stop['lng']] for stop in route_data],
+                                    color="blue",
+                                    weight=4,
+                                    opacity=0.7,
+                                    popup="Planned Route"
+                                   ).add_to(m)
+                    
+                    
                 m.fit_bounds([[8.0, 76.0], [24.0, 89.0]])
                 st_folium(m, width=1200, height=500)
+        
             else:
                 st.info("👆 East Admin: Add locations using sidebar form")
         else:
