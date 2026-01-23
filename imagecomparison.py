@@ -170,9 +170,9 @@ with east_tab:
                     folium.Marker([stop['lat'], stop['lng']],
                                   popup=f"""
                                   <b>📍 {stop['name']}</b><br>
-                                  <i>Expected: {stop['expected_date']}</i><br>
+                                  <i>Expected: {stop['date']}</i><br>
                                   <small>Route checkpoint</small>""",
-                                  tooltip=f"{stop['name']} ({stop['expected_date']})",
+                                  tooltip=f"{stop['name']} ({stop['date']})",
                                   icon=folium.DivIcon(
                                       html=f"""
                                       <div style="
