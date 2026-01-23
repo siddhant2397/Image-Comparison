@@ -160,7 +160,7 @@ with east_tab:
             # Route Map
             st.subheader("🗺️ East Coast Route")
             route_data = list(dbs["route"].find())
-            admin_locations = list(dbs["locations"].find())  # Admin current location
+            admin_locations = list(dbs["locations"].find().sort("date", -1))  # Admin current location
             latest_admin_loc = admin_locations[0] if admin_locations else None 
             if route_data or admin_locations:
                 m = folium.Map(location=[15.0, 85.0], zoom_start=6,
