@@ -172,7 +172,7 @@ with east_tab:
                                       marker=dict(line=dict(width=1.5, color='white')))
             fig_scatter.update_layout(xaxis_title="Day Number",yaxis_title="Daily Distance (km)",height=450,
                                       showlegend=False)
-            st.plotly_chart(fig_scatter, use_container_width=True)
+            st.plotly_chart(fig_scatter,width='stretch')
 
             
             
@@ -315,6 +315,25 @@ with west_tab:
                     'Total (km)': summary.values
                 })
                 st.dataframe(leaderboard_df, width='stretch', height=300)
+
+            st.subheader("📊 Daily Team Distance - Day Numbers")
+            df_daily = df_team.groupby(df_team['date'].dt.date)['team_total_distance'].sum().reset_index()
+            df_daily = df_daily.sort_values('date')  # Oldest first
+            df_daily['day_number'] = range(1, len(df_daily) + 1)
+            df_daily['day_label'] = ['Day ' + str(n) for n in df_daily['day_number']]
+            fig_scatter = px.scatter(
+                df_daily.tail(30),  # Last 30 days
+                x='day_label',
+                y='team_total_distance',
+                size='team_total_distance',  # Bigger dots = more distance
+                size_max=25,color='team_total_distance',color_continuous_scale='Viridis',
+                title="Daily Distance (Day 1, 2, 3...)",
+                hover_data=['date', 'team_total_distance'])
+            fig_scatter.update_traces(texttemplate='%{y:.0f}km',textposition='middle center',textfont_size=12,
+                                      marker=dict(line=dict(width=1.5, color='white')))
+            fig_scatter.update_layout(xaxis_title="Day Number",yaxis_title="Daily Distance (km)",height=450,
+                                      showlegend=False)
+            st.plotly_chart(fig_scatter,width='stretch')
             
             
             
