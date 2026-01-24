@@ -300,19 +300,46 @@ with west_tab:
             
             # Route Map
             st.subheader("🗺️ West Coast Route")
-            locs = list(dbs["locations"].find().sort("date", -1))
-            if locs:
-                m = folium.Map(location=[20.0, 72.0], zoom_start=6, tiles='https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}',
-        attr='Google')
-                for loc in locs:
-                    folium.Marker(
-                        [loc['lat'], loc['lng']],
-                        popup=f"<b style='color:blue'>{loc['name']}</b><br>{loc.get('date', 'N/A')}",
-                        tooltip=loc['name'],
-                        icon=folium.Icon(color='blue', icon='info-sign')
-                    ).add_to(m)
+            route_data = list(dbs["route"].find())
+            admin_locations = list(dbs["locations"].find().sort("date", -1))  # Admin current location
+            latest_admin_loc = admin_locations[0] if admin_locations else None 
+            if route_data or admin_locations:
+                m = folium.Map(location=[20.0, 72.0], zoom_start=6,
+                               tiles='https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}',
+                               attr='Google')
+                for stop in route_data:
+                    folium.Marker([stop['lat'], stop['lng']],
+                                  popup=f"""
+                                  <b>📍 {stop['name']}</b><br>
+                                  <i>Expected: {stop['date']}</i><br>
+                                  <small>Route checkpoint</small>""",
+                                  tooltip=f"{stop['name']} ({stop['date']})",
+                                  icon=folium.DivIcon(
+                                      html='🚴',
+                                      icon_size=(10,10),
+                                      icon_anchor=(15,15))
+                                 ).add_to(m)
 
-                m.fit_bounds([[8.0, 68.0], [24.0, 75.0]]) 
+                if latest_admin_loc:
+                    folium.Marker([latest_admin_loc['lat'], latest_admin_loc['lng']],
+                                  popup=f"""
+                                  <b style='color:red'>🎯 CURRENT LOCATION</b><br>
+                                  {latest_admin_loc['name']}<br>
+                                  <small>Reported: {latest_admin_loc.get('date', 'Today')}</small""",
+                                  tooltip="CURRENT POSITION",
+                                  icon=folium.Icon(color='red', icon='info-sign', icon_color='white')
+                                 ).add_to(m)
+
+                if len(route_data) > 1:
+                    folium.PolyLine(locations=[[stop['lat'], stop['lng']] for stop in route_data],
+                                    color="blue",
+                                    weight=4,
+                                    opacity=0.7,
+                                    popup="Planned Route"
+                                   ).add_to(m)
+                    
+                    
+                m.fit_bounds([[8.0, 68.0], [24.0, 75.0]])
                 st_folium(m, width=1200, height=500)
             else:
                 st.info("👆 West Admin: Add locations using sidebar form")
