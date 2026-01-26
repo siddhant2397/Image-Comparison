@@ -237,7 +237,7 @@ with west_tab:
         with st.sidebar.expander("📝 West Coast Entry Forms", expanded=True):
             
             with st.form("west_individual"):
-                cyclist = st.selectbox("Select Cyclist", ["Vikram", "Sonia", "Kiran", "Meera"])
+                cyclist = st.selectbox("Select Cyclist", ["Praveen Kumar", "Nayana B Paul", "Ria Gope", "Bairagi Janardhan Arun", "Sameer Patil","Pushpender","Ramesh Ola","Pooja Jangra","Neeraj Dahia","Rishabh Bhandari","Mahendra Kumar","Layaket Ali","Sanjay Kumar","Lalita Kumari","Tulsi Das","Anuradha Yadav","Bansode Ganesh","Manju Mein","Gagan Yadav","Vignesh","Yashvant Thorat","Sarandev", "Anjali Kumari","Jadeja Nitalba","Arya Krishna","Rahul","Charanya Rutvik","Shridhar","Vaishnav","Ajith Krishnan","Pawan Prakash","Smirthy","Vanishree","Shalu meena","Arunima","Dinesh Yadav","Arun M","Yashkumar","Shinde Vaibhav","Sanjeev Kumar","Sanjay Nair","Anu Kumari","Mansoori","Neeraj Sharma","Varsha","Khushbu","Deepanjali Goya","Rinku","Payal Marve","Pinky","Sapna Rajput","Steffy","Rajeshwari","Geetanjali","Bornita","Shraddha Dhulaji","Bhil Pooja","Jyoti Kumai","Kajal Kushwaha","Alpna","Bharat Kumar","Amardeep","Jadhav","Archna","Shivani"])
                 daily_distance = st.number_input("Today's Distance (km)", min_value=0.0, step=0.1)
                 submitted = st.form_submit_button("✅ Log West Distance")
                 if submitted:
