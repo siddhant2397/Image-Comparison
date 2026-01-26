@@ -76,7 +76,7 @@ with east_tab:
         with st.sidebar.expander("📝 East Coast Entry Forms", expanded=True):
             
             with st.form("east_individual"):
-                cyclist = st.selectbox("Select Cyclist", ["Ravi", "Priya", "Amit", "Neha"])
+                cyclist = st.selectbox("Select Cyclist", ["Siddhant Goswami", "Sujata Tushir", "Saurabh Yadav", "Kunal Sharma", "Tyarhiikho","Manoj","Kiran Mer","Jyoti Shukla","Pooja Jirwal","Lavanya","Satya Vrat","Belalsen","Saibabu","Duttajit","Monika Sabbu","Durga Charan","Chandra Shekhar","Shriram Meena","Srikanth","Madne Anil","Rajesh","Dinesh","Kunal Shah","Roshan","Mithilesh","Asha","Dhivya","Sivasankari","Hemlatha","Santhya","Balaji","Dasari Mouli","Amisha","Manisha Debnath","Shivani yadav","Mona Singh","Rajani Singh","Rachana","Gujalaramar","Sathish Kumar","Gosula Hareesh","Mude Ramana","Gottipalli Sateesh","Pushpender","Samir Modi","Saurav Sharma","Dora","Manisha Devi","Manju","Rimpa","Manisha","Munna Devi","Manasi","Mohini","Kodigana Bhawani","Pativada Pavani","Jyoti Kumari","Pooja Murmu","Jahnavi","Pallavi","Rahul Meitei","Muttanna","Babita Rani","Rohini M","Abhinaya"])
                 daily_distance = st.number_input("Today's Distance (km)", min_value=0.0, step=0.1)
                 submitted = st.form_submit_button("✅ Log East Distance")
                 if submitted:
