@@ -195,8 +195,12 @@ with east_tab:
             beacons = list(dbs["beacons"].find({"active": True}).sort([("date", -1), ("time", -1)]))
             latest_beacon = beacons[0] if beacons else None
             if latest_beacon:
-                if st.button("👁️ VIEW LIVE", key=f"east_live_{latest_beacon['_id']}"):
-                    st.link_button("Open Live Tracking", latest_beacon['url'], open_in_new_tab=True)
+                st.markdown(f"""<a href="{latest_beacon['url']}" target="_blank" style="text-decoration: none;">
+                <button style="background-color: #1f77b4; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+                👁️ VIEW LIVE
+                </button>
+                </a>
+                """, unsafe_allow_html=True)
             else:
                 st.info("👆 Admin: Add Strava Beacon link")
 
@@ -381,8 +385,12 @@ with west_tab:
             beacons = list(dbs["beacons"].find({"active": True}).sort([("date", -1), ("time", -1)]))
             latest_beacon = beacons[0] if beacons else None
             if latest_beacon:
-                if st.button("👁️ VIEW LIVE", key=f"east_live_{latest_beacon['_id']}"):
-                    st.link_button("Open Live Tracking", latest_beacon['url'], open_in_new_tab=True)
+                st.markdown(f"""<a href="{latest_beacon['url']}" target="_blank" style="text-decoration: none;">
+                <button style="background-color: #1f77b4; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+                👁️ VIEW LIVE
+                </button>
+                </a>
+                """, unsafe_allow_html=True)
             else:
                 st.info("👆 Admin: Add Strava Beacon link")
 
