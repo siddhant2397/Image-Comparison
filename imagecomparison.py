@@ -192,7 +192,7 @@ with east_tab:
 
 
             st.subheader("📡 Live Tracking Link")
-            beacons = list(dbs["beacons"].find({"active": True}).sort([("date", -1), ("time", -1)])
+            beacons = list(dbs["beacons"].find({"active": True}).sort([("date", -1), ("time", -1)]))
             latest_beacon = beacons[0] if beacons else None
             if latest_beacon:
                 if st.button("👁️ VIEW LIVE", key=f"east_live_{latest_beacon['_id']}"):
@@ -378,7 +378,7 @@ with west_tab:
             
             
             st.subheader("📡 Live Tracking Link")
-            beacons = list(dbs["beacons"].find({"active": True}).sort([("date", -1), ("time", -1)])
+            beacons = list(dbs["beacons"].find({"active": True}).sort([("date", -1), ("time", -1)]))
             latest_beacon = beacons[0] if beacons else None
             if latest_beacon:
                 if st.button("👁️ VIEW LIVE", key=f"east_live_{latest_beacon['_id']}"):
