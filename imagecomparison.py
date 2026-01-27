@@ -24,6 +24,7 @@ def get_east_db():
         "team": db["east_team"],
         "locations": db["east_locations"],
         "route": db["east_route"],
+        "beacons": db["east_beacons"]
     }
 
 @st.cache_resource
@@ -35,6 +36,7 @@ def get_west_db():
         "team": db["west_team"],
         "locations": db["west_locations"],
         "route": db["west_route"],
+        "beacons": db["west_beacons"]
     }
 
 
@@ -120,6 +122,20 @@ with east_tab:
                     })
                     st.success(f"✅ {location_name} added!")
                     st.rerun()
+
+            with st.form("east_beacon"):
+                beacon_url = st.text_input("Strava Beacon Link", placeholder="https://strava.com/beacon/abc123")
+                submitted = st.form_submit_button("📡 Add Live Tracking")
+                if submitted:
+                    dbs = get_east_db()
+                    dbs["beacons"].insert_one({
+                        "url": beacon_url,
+                        "date": date.today().isoformat(),
+                        "time": datetime.now().isoformat(),
+                        "active": True
+                    })
+                    st.success(f"✅ Live tracking successful")
+                    st.rerun()
     
     
     col1, col2, col3, col4 = st.columns(4)
@@ -173,6 +189,16 @@ with east_tab:
             fig_scatter.update_layout(xaxis_title="Day Number",yaxis_title="Daily Distance (km)",height=450,
                                       showlegend=False)
             st.plotly_chart(fig_scatter,width='stretch')
+
+
+            st.subheader("📡 Live Tracking Link")
+            beacons = list(dbs["beacons"].find({"active": True}).sort([("date", -1), ("time", -1)])
+            latest_beacon = beacons[0] if beacons else None
+            if latest_beacon:
+                if st.button("👁️ VIEW LIVE", key=f"east_live_{latest_beacon['_id']}"):
+                    st.link_button("Open Live Tracking", latest_beacon['url'], open_in_new_tab=True)
+            else:
+                st.info("👆 Admin: Add Strava Beacon link")
 
             
             
@@ -281,6 +307,21 @@ with west_tab:
                     })
                     st.success(f"✅ {location_name} added!")
                     st.rerun()
+
+            with st.form("west_beacon"):
+                beacon_url = st.text_input("Strava Beacon Link", placeholder="https://strava.com/beacon/abc123")
+                submitted = st.form_submit_button("📡 Add Live Tracking")
+                if submitted:
+                    dbs = get_west_db()
+                    dbs["beacons"].insert_one({
+                        "url": beacon_url,
+                        "date": date.today().isoformat(),
+                        "time": datetime.now().isoformat(),
+                        "active": True
+                    })
+                    st.success(f"✅ Live tracking successful")
+                    st.rerun()
+            
     
     
     col1, col2, col3, col4 = st.columns(4)
@@ -336,6 +377,15 @@ with west_tab:
             st.plotly_chart(fig_scatter,width='stretch')
             
             
+            st.subheader("📡 Live Tracking Link")
+            beacons = list(dbs["beacons"].find({"active": True}).sort([("date", -1), ("time", -1)])
+            latest_beacon = beacons[0] if beacons else None
+            if latest_beacon:
+                if st.button("👁️ VIEW LIVE", key=f"east_live_{latest_beacon['_id']}"):
+                    st.link_button("Open Live Tracking", latest_beacon['url'], open_in_new_tab=True)
+            else:
+                st.info("👆 Admin: Add Strava Beacon link")
+
             
             st.subheader("🗺️ West Coast Route")
             route_data = list(dbs["route"].find())
